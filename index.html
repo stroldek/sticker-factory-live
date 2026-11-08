@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101411">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sticker Factory</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">S</div><div><b>Sticker Factory</b><small>Фото → стикерпак Telegram</small></div></div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Настройки">⚙</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Из фотографий<br><span>в стикеры.</span></h1>
+      <p>Выбери пачку фото, нажми одну кнопку — размер, формат и загрузка в Telegram сделаются сами.</p>
+    </section>
+
+    <!-- Telegram connection -->
+    <section class="panel" id="connectPanel">
+      <div class="panel-head">
+        <div><h2>Вход через Telegram</h2><p id="connectMeta">Паки создаются на твой аккаунт</p></div>
+        <span class="status" id="connectStatus">НЕ ВОШЁЛ</span>
+      </div>
+
+      <div id="loginView">
+        <p class="lead" id="loginLead">Нажми кнопку ниже и подтверди вход в Telegram. Пароли и коды не нужны.</p>
+        <div id="loginWidget" class="login-slot"></div>
+        <span class="hint" id="loginHint"></span>
+        <details>
+          <summary>Кнопка не появилась или пишет ошибку?</summary>
+          <p class="hint">Если видишь «Bot domain invalid», домен сайта не привязан к боту: в @BotFather отправь <code>/setdomain</code>, выбери бота и укажи адрес этого сайта. Если кнопки нет вообще, проверь интернет и отключи блокировщики рекламы.</p>
+        </details>
+      </div>
+
+      <div id="connectedView" hidden>
+        <div class="who"><div class="tg-icon">➤</div><div class="tg-copy"><b id="whoUser"></b><span id="whoBot"></span></div><button class="text-btn" id="logoutBtn">Выйти</button></div>
+      </div>
+    </section>
+
+    <!-- Upload -->
+    <section class="panel" id="queuePanel">
+      <div class="panel-head"><div><h2>Фотографии</h2><p id="queueMeta">Пока ничего нет</p></div><button id="clearBtn" class="text-btn" disabled>Очистить</button></div>
+      <label class="dropzone" id="dropzone" for="fileInput">
+        <div class="empty-icon">＋</div>
+        <b id="dropTitle">Выбрать фотографии</b>
+        <span>Можно сразу пачкой из галереи или перетащить сюда</span>
+      </label>
+      <input id="fileInput" type="file" accept="image/*" multiple hidden>
+      <div id="grid" class="grid"></div>
+      <p class="tip" id="gridTip" hidden>Нажми на эмодзи под стикером, чтобы поменять его.</p>
+    </section>
+
+    <!-- Options -->
+    <section class="panel">
+      <div class="panel-head"><div><h2>Параметры пака</h2><p>Всё сохраняется на этом устройстве</p></div></div>
+
+      <label class="field"><span>Название пака</span>
+        <input id="packTitle" maxlength="64" placeholder="Мой стикерпак">
+      </label>
+
+      <label class="field"><span>Куда добавить</span>
+        <select id="packTarget"><option value="">Создать новый пак</option></select>
+      </label>
+
+      <div class="field"><span>Эмодзи по умолчанию</span>
+        <div class="chips" id="emojiChips"></div>
+        <input id="defaultEmoji" class="emoji-input" maxlength="8" value="😀" aria-label="Эмодзи по умолчанию">
+      </div>
+
+      <div class="field"><span>Как поместить фото в стикер</span>
+        <div class="seg" id="fitSeg">
+          <button data-v="contain" class="on">Целиком</button>
+          <button data-v="cover">Заполнить кадр</button>
+        </div>
+      </div>
+
+      <label class="setting-row switch-row">
+        <div><b>Скруглить углы</b><small>Мягкий край, как у обычных стикеров</small></div>
+        <input type="checkbox" id="roundCorners" class="switch">
+      </label>
+    </section>
+
+    <button class="primary-btn big" id="createBtn" disabled>Создать стикерпак</button>
+    <p class="hint center" id="createHint">Сначала войди через Telegram</p>
+
+    <!-- Progress -->
+    <section class="panel" id="progressPanel" hidden>
+      <div class="panel-head"><div><h2 id="progressTitle">Создаю пак…</h2><p id="progressMeta"></p></div><button id="stopBtn" class="text-btn">Остановить</button></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <ul class="log" id="log"></ul>
+    </section>
+
+    <!-- Result -->
+    <section class="panel result" id="resultPanel" hidden>
+      <div class="panel-head"><div><h2 id="resultTitle">Готово</h2><p id="resultMeta"></p></div></div>
+      <div class="queue-actions">
+        <a class="primary-btn link-btn" id="resultLink" href="#" target="_blank" rel="noopener">Открыть в Telegram</a>
+        <button class="secondary-btn" id="copyLinkBtn">Копировать ссылку</button>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="panel" id="historyPanel" hidden>
+      <div class="panel-head"><div><h2>Твои паки</h2><p>Созданные в этом браузере</p></div></div>
+      <ul class="packs" id="packList"></ul>
+    </section>
+  </main>
+  <footer>STICKER FACTORY <span>v2.0</span></footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="modal-backdrop" id="settingsModal" hidden>
+  <div class="modal">
+    <div class="modal-head"><h3>Настройки</h3><button id="closeModal" class="icon-btn" aria-label="Закрыть">✕</button></div>
+    <div class="modal-note">Фотографии обрабатываются прямо на твоём телефоне. На сервер уходят только готовые стикеры (до 512 КБ каждый) и только чтобы добавить их в твой пак.</div>
+    <p class="hint">В этом браузере хранятся настройки и список созданных тобой паков.</p>
+    <div class="queue-actions">
+      <button class="secondary-btn danger" id="resetAll">Стереть данные в браузере</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
