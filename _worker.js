@@ -76,7 +76,7 @@ async function tg(env, method, build, tries = 3) {
   for (let i = 0; ; i++) {
     let res;
     try { res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: "POST", body: build() }); }
-    catch { throw new TgError("Telegram недоступен, попробуй ещё раз", 502); }
+    catch { throw new TgError("tg_unavailable", 502); }
     let data = null; try { data = await res.json(); } catch { /* ignore */ }
     if (data && data.ok) return data.result;
     const ra = data && data.parameters && data.parameters.retry_after;
@@ -98,16 +98,17 @@ const makeName = (title, bot) => `${slugify(title)}_${Math.random().toString(36)
 const pickEmoji = s => { const m = (s || "").match(/\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/u); return m ? m[0] : null; };
 const nameOk = (name, bot) => typeof name === "string" && name.length <= 64 && new RegExp(`^[a-z][a-z0-9_]*_by_${bot.replace(/[^\w]/g, "")}$`, "i").test(name);
 const json = (obj, status = 200, extra = {}) => new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extra } });
-const fail = (status, error, extra = {}) => json({ error, ...extra }, status);
+// Errors carry a machine-readable `code`; the browser translates it (Telegram's own text goes in `error`).
+const fail = (status, code, extra = {}) => json({ code, ...extra }, status);
 
 async function readSticker(form) {
   const file = form.get("file");
-  if (!file || typeof file === "string") throw fail(400, "Файл не передан");
-  if (file.size === 0 || file.size > MAX_FILE) throw fail(400, "Файл больше 512 КБ");
+  if (!file || typeof file === "string") throw fail(400, "no_file");
+  if (file.size === 0 || file.size > MAX_FILE) throw fail(400, "too_big");
   const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
   const png = head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47;
   const webp = head[0] === 0x52 && head[1] === 0x49 && head[8] === 0x57 && head[9] === 0x45 && head[10] === 0x42 && head[11] === 0x50;
-  if (!png && !webp) throw fail(400, "Нужен WEBP или PNG");
+  if (!png && !webp) throw fail(400, "bad_type");
   return { file, ext: png ? "png" : "webp" };
 }
 
@@ -116,7 +117,7 @@ async function quota(env, uid, kind, limit) {
   if (!env.LIMITS) return;
   const key = `q:${uid}:${new Date().toISOString().slice(0, 10)}:${kind}`;
   const used = Number(await env.LIMITS.get(key)) || 0;
-  if (used >= limit) throw fail(429, kind === "p" ? "Дневной лимит паков исчерпан. Попробуй завтра." : "Дневной лимит стикеров исчерпан. Попробуй завтра.", { retryAfter: 0, quota: true });
+  if (used >= limit) throw fail(429, kind === "p" ? "quota_packs" : "quota_stickers", { retryAfter: 0, quota: true });
   await env.LIMITS.put(key, String(used + 1), { expirationTtl: 2 * 86400 });
 }
 
@@ -129,30 +130,30 @@ async function api(request, env, url) {
     const user = await readSession(request, env);
     return json({ configured: true, bot: env.BOT_USERNAME, user, maintenance: env.MAINTENANCE === "1" });
   }
-  if (missing.length) return fail(503, "Сервер не настроен: нет " + missing.join(", "));
-  if (env.MAINTENANCE === "1") return fail(503, "Сервис на техническом обслуживании");
+  if (missing.length) return fail(503, "not_configured", { missing });
+  if (env.MAINTENANCE === "1") return fail(503, "maintenance");
 
   if (path === "/api/logout" && request.method === "POST") {
     return json({ ok: true }, 200, { "Set-Cookie": cookieHeader("", 0) });
   }
 
   // Everything below needs a logged-in user. Custom header = CSRF protection (cross-site forms can't set it).
-  if (request.headers.get("X-Requested-With") !== "sticker-factory") return fail(400, "Bad request");
+  if (request.headers.get("X-Requested-With") !== "sticker-factory") return fail(400, "bad_request");
   const user = await readSession(request, env);
-  if (!user) return fail(401, "Нужно войти через Telegram");
+  if (!user) return fail(401, "login_required");
   const bot = env.BOT_USERNAME;
 
   try {
     if (path === "/api/pack/info" && request.method === "GET") {
       const name = url.searchParams.get("name");
-      if (!nameOk(name, bot)) return fail(400, "Неверное имя пака");
+      if (!nameOk(name, bot)) return fail(400, "bad_name");
       const set = await tg(env, "getStickerSet", params({ name }));
       return json({ title: set.title, count: set.stickers.length });
     }
 
     if (path === "/api/pack/create" && request.method === "POST") {
       const form = await request.formData();
-      const title = String(form.get("title") || "").trim().slice(0, 64) || "Мой стикерпак";
+      const title = String(form.get("title") || "").trim().slice(0, 64) || "Stickers";
       const emoji = pickEmoji(String(form.get("emoji") || "")) || "😀";
       const { file, ext } = await readSticker(form);
       await quota(env, user.id, "p", Number(env.DAILY_PACKS) || 10);
@@ -179,7 +180,7 @@ async function api(request, env, url) {
     if (path === "/api/pack/add" && request.method === "POST") {
       const form = await request.formData();
       const name = String(form.get("name") || "");
-      if (!nameOk(name, bot)) return fail(400, "Неверное имя пака");
+      if (!nameOk(name, bot)) return fail(400, "bad_name");
       const emoji = pickEmoji(String(form.get("emoji") || "")) || "😀";
       const { file, ext } = await readSticker(form);
       await quota(env, user.id, "s", Number(env.DAILY_STICKERS) || 300);
@@ -194,10 +195,10 @@ async function api(request, env, url) {
     }
   } catch (e) {
     if (e instanceof Response) return e;
-    if (e instanceof TgError) return fail(e.code === 429 ? 429 : e.code >= 400 && e.code < 500 ? 400 : 502, e.message, { retryAfter: e.retryAfter || 0 });
-    return fail(500, "Внутренняя ошибка");
+    if (e instanceof TgError) return fail(e.code === 429 ? 429 : e.code >= 400 && e.code < 500 ? 400 : 502, "tg", { error: e.message, retryAfter: e.retryAfter || 0 });
+    return fail(500, "internal");
   }
-  return fail(404, "Not found");
+  return fail(404, "not_found");
 }
 
 // ---------- entry ----------
@@ -216,6 +217,9 @@ export default {
     }
 
     if (url.pathname.startsWith("/api/")) return api(request, env, url);
+
+    // Keep project files that are not part of the site from being served.
+    if (/^\/(_worker\.js|wrangler\.jsonc|\.git|\.assetsignore|tests)(\/|$)/.test(url.pathname)) return new Response("Not found", { status: 404 });
 
     const res = await env.ASSETS.fetch(request);
     const out = new Response(res.body, res);

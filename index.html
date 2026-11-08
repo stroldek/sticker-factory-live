@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ru">
+<html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101411">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Sticker Factory</title>
+<title>Stickers Factory</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icon.svg">
@@ -14,117 +14,151 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">S</div><div><b>Sticker Factory</b><small>Фото → стикерпак Telegram</small></div></div>
-    <button class="icon-btn" id="settingsBtn" aria-label="Настройки">⚙</button>
+    <div class="brand"><div class="brand-mark">S</div><div><b>Sticker Factory</b><small data-i18n="brand.sub">Фото → стікерпак Telegram</small></div></div>
+    <button class="icon-btn" id="settingsBtn" data-i18n-aria="set.aria" aria-label="Налаштування">⚙</button>
   </header>
 
   <main>
     <section class="hero">
-      <h1>Из фотографий<br><span>в стикеры.</span></h1>
-      <p>Выбери пачку фото, нажми одну кнопку — размер, формат и загрузка в Telegram сделаются сами.</p>
+      <h1 data-i18n-html="hero.title">Із фотографій<br><span>у стікери.</span></h1>
+      <p data-i18n="hero.text">Обери пачку фото, натисни одну кнопку — розмір, формат і завантаження в Telegram зроблять усе самі.</p>
     </section>
 
-    <!-- Telegram connection -->
+    <div class="maint" id="maintBanner" data-i18n="maint" hidden>Сервіс на технічному обслуговуванні. Спробуй пізніше.</div>
+
+    <!-- Telegram login -->
     <section class="panel" id="connectPanel">
       <div class="panel-head">
-        <div><h2>Вход через Telegram</h2><p id="connectMeta">Паки создаются на твой аккаунт</p></div>
-        <span class="status" id="connectStatus">НЕ ВОШЁЛ</span>
+        <div><h2 data-i18n="login.title">Вхід через Telegram</h2><p data-i18n="login.meta">Паки створюються на твій акаунт</p></div>
+        <span class="status" id="connectStatus">НЕ ВВІЙШОВ</span>
       </div>
 
       <div id="loginView">
-        <p class="lead" id="loginLead">Нажми кнопку ниже и подтверди вход в Telegram. Пароли и коды не нужны.</p>
+        <p class="lead" id="loginLead">Натисни кнопку нижче й підтвердь вхід у Telegram. Паролі та коди не потрібні.</p>
         <div id="loginWidget" class="login-slot"></div>
         <span class="hint" id="loginHint"></span>
-        <details>
-          <summary>Кнопка не появилась или пишет ошибку?</summary>
-          <p class="hint">Если видишь «Bot domain invalid», домен сайта не привязан к боту: в @BotFather отправь <code>/setdomain</code>, выбери бота и укажи адрес этого сайта. Если кнопки нет вообще, проверь интернет и отключи блокировщики рекламы.</p>
-        </details>
       </div>
 
       <div id="connectedView" hidden>
-        <div class="who"><div class="tg-icon">➤</div><div class="tg-copy"><b id="whoUser"></b><span id="whoBot"></span></div><button class="text-btn" id="logoutBtn">Выйти</button></div>
+        <div class="who"><div class="tg-icon">➤</div><div class="tg-copy"><b id="whoUser"></b><span id="whoBot"></span></div><button class="text-btn" id="logoutBtn" data-i18n="logout">Вийти</button></div>
       </div>
     </section>
 
     <!-- Upload -->
     <section class="panel" id="queuePanel">
-      <div class="panel-head"><div><h2>Фотографии</h2><p id="queueMeta">Пока ничего нет</p></div><button id="clearBtn" class="text-btn" disabled>Очистить</button></div>
+      <div class="panel-head"><div><h2 data-i18n="photos.title">Фотографії</h2><p id="queueMeta">Поки нічого немає</p></div><button id="clearBtn" class="text-btn" data-i18n="clear" disabled>Очистити</button></div>
       <label class="dropzone" id="dropzone" for="fileInput">
         <div class="empty-icon">＋</div>
-        <b id="dropTitle">Выбрать фотографии</b>
-        <span>Можно сразу пачкой из галереи или перетащить сюда</span>
+        <b id="dropTitle">Обрати фотографії</b>
+        <span data-i18n="drop.sub">Можна одразу пачкою з галереї або перетягнути сюди</span>
       </label>
       <input id="fileInput" type="file" accept="image/*" multiple hidden>
       <div id="grid" class="grid"></div>
-      <p class="tip" id="gridTip" hidden>Нажми на эмодзи под стикером, чтобы поменять его.</p>
+      <p class="tip" id="gridTip" data-i18n="tip" hidden>Натисни на емодзі під стікером, щоб змінити його.</p>
     </section>
 
     <!-- Options -->
     <section class="panel">
-      <div class="panel-head"><div><h2>Параметры пака</h2><p>Всё сохраняется на этом устройстве</p></div></div>
+      <div class="panel-head"><div><h2 data-i18n="opt.title">Параметри паку</h2><p data-i18n="opt.sub">Усе зберігається на цьому пристрої</p></div></div>
 
-      <label class="field"><span>Название пака</span>
-        <input id="packTitle" maxlength="64" placeholder="Мой стикерпак">
+      <label class="field"><span data-i18n="opt.name">Назва паку</span>
+        <input id="packTitle" maxlength="64" data-i18n-ph="opt.namePh" placeholder="Мій стікерпак">
       </label>
 
-      <label class="field"><span>Куда добавить</span>
-        <select id="packTarget"><option value="">Создать новый пак</option></select>
+      <label class="field"><span data-i18n="opt.target">Куди додати</span>
+        <select id="packTarget"><option value="">Створити новий пак</option></select>
       </label>
 
-      <div class="field"><span>Эмодзи по умолчанию</span>
+      <div class="field"><span data-i18n="opt.emoji">Емодзі за замовчуванням</span>
         <div class="chips" id="emojiChips"></div>
-        <input id="defaultEmoji" class="emoji-input" maxlength="8" value="😀" aria-label="Эмодзи по умолчанию">
+        <input id="defaultEmoji" class="emoji-input" maxlength="8" value="😀" aria-label="Emoji">
       </div>
 
-      <div class="field"><span>Как поместить фото в стикер</span>
+      <div class="field"><span data-i18n="opt.fit">Як вмістити фото в стікер</span>
         <div class="seg" id="fitSeg">
-          <button data-v="contain" class="on">Целиком</button>
-          <button data-v="cover">Заполнить кадр</button>
+          <button data-v="contain" class="on" data-i18n="opt.contain">Цілком</button>
+          <button data-v="cover" data-i18n="opt.cover">Заповнити кадр</button>
         </div>
       </div>
 
       <label class="setting-row switch-row">
-        <div><b>Скруглить углы</b><small>Мягкий край, как у обычных стикеров</small></div>
+        <div><b data-i18n="opt.round">Заокруглити кути</b><small data-i18n="opt.roundSub">М’який край, як у звичайних стікерів</small></div>
         <input type="checkbox" id="roundCorners" class="switch">
       </label>
     </section>
 
-    <button class="primary-btn big" id="createBtn" disabled>Создать стикерпак</button>
-    <p class="hint center" id="createHint">Сначала войди через Telegram</p>
+    <button class="primary-btn big" id="createBtn" disabled>Створити стікерпак</button>
+    <p class="hint center" id="createHint"></p>
 
     <!-- Progress -->
     <section class="panel" id="progressPanel" hidden>
-      <div class="panel-head"><div><h2 id="progressTitle">Создаю пак…</h2><p id="progressMeta"></p></div><button id="stopBtn" class="text-btn">Остановить</button></div>
+      <div class="panel-head"><div><h2 id="progressTitle">Створюю пак…</h2><p id="progressMeta"></p></div><button id="stopBtn" class="text-btn" data-i18n="prog.stop">Зупинити</button></div>
       <div class="bar"><i id="barFill"></i></div>
       <ul class="log" id="log"></ul>
     </section>
 
     <!-- Result -->
     <section class="panel result" id="resultPanel" hidden>
-      <div class="panel-head"><div><h2 id="resultTitle">Готово</h2><p id="resultMeta"></p></div></div>
+      <div class="panel-head"><div><h2 id="resultTitle" data-i18n="res.ready">Готово</h2><p id="resultMeta"></p></div></div>
       <div class="queue-actions">
-        <a class="primary-btn link-btn" id="resultLink" href="#" target="_blank" rel="noopener">Открыть в Telegram</a>
-        <button class="secondary-btn" id="copyLinkBtn">Копировать ссылку</button>
+        <a class="primary-btn link-btn" id="resultLink" href="#" target="_blank" rel="noopener" data-i18n="res.open">Відкрити в Telegram</a>
+        <button class="secondary-btn" id="copyLinkBtn" data-i18n="res.copy">Скопіювати посилання</button>
       </div>
     </section>
 
     <!-- History -->
     <section class="panel" id="historyPanel" hidden>
-      <div class="panel-head"><div><h2>Твои паки</h2><p>Созданные в этом браузере</p></div></div>
+      <div class="panel-head"><div><h2 data-i18n="hist.title">Твої паки</h2><p data-i18n="hist.sub">Створені в цьому браузері</p></div></div>
       <ul class="packs" id="packList"></ul>
     </section>
   </main>
-  <footer>STICKER FACTORY <span>v2.0</span></footer>
+
+  <footer class="foot">
+    <svg class="raccoon" viewBox="0 0 96 72" role="img" aria-label="Raccoon" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="rcTailClip"><ellipse cx="82" cy="42" rx="9" ry="21" transform="rotate(24 82 42)"/></clipPath></defs>
+      <g class="rc-tail">
+        <ellipse cx="82" cy="42" rx="9" ry="21" transform="rotate(24 82 42)" fill="#8b949e"/>
+        <g clip-path="url(#rcTailClip)" fill="#2b2f36">
+          <rect x="60" y="26" width="40" height="5" transform="rotate(24 82 42)"/>
+          <rect x="60" y="38" width="40" height="5" transform="rotate(24 82 42)"/>
+          <rect x="60" y="50" width="40" height="5" transform="rotate(24 82 42)"/>
+        </g>
+      </g>
+      <ellipse cx="48" cy="57" rx="24" ry="14" fill="#8b949e"/>
+      <ellipse cx="48" cy="61" rx="14" ry="9" fill="#cfd5db"/>
+      <ellipse cx="35" cy="68" rx="7" ry="3.6" fill="#2b2f36"/>
+      <ellipse cx="61" cy="68" rx="7" ry="3.6" fill="#2b2f36"/>
+      <g class="rc-head">
+        <circle cx="29" cy="19" r="7.5" fill="#8b949e"/><circle cx="29" cy="19.5" r="3.6" fill="#2b2f36"/>
+        <circle cx="67" cy="19" r="7.5" fill="#8b949e"/><circle cx="67" cy="19.5" r="3.6" fill="#2b2f36"/>
+        <ellipse cx="48" cy="34" rx="25" ry="19" fill="#9aa3ad"/>
+        <ellipse cx="48" cy="42" rx="17" ry="11" fill="#e9edf1"/>
+        <ellipse cx="36.5" cy="33" rx="11.5" ry="7.2" transform="rotate(-12 36.5 33)" fill="#2b2f36"/>
+        <ellipse cx="59.5" cy="33" rx="11.5" ry="7.2" transform="rotate(12 59.5 33)" fill="#2b2f36"/>
+        <g class="rc-eye"><ellipse cx="37.5" cy="33" rx="4.3" ry="4.7" fill="#fff"/><circle cx="38.3" cy="33.4" r="2.5" fill="#101215"/><circle cx="39" cy="32.4" r=".9" fill="#fff"/></g>
+        <g class="rc-eye"><ellipse cx="58.5" cy="33" rx="4.3" ry="4.7" fill="#fff"/><circle cx="57.7" cy="33.4" r="2.5" fill="#101215"/><circle cx="58.4" cy="32.4" r=".9" fill="#fff"/></g>
+        <ellipse cx="48" cy="42.5" rx="4.2" ry="3" fill="#1c1f24"/>
+        <path d="M48 45.5v2.2M43.5 48.2q4.5 3.2 9 0" fill="none" stroke="#1c1f24" stroke-width="1.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <span class="foot-text">Stickers Factory by stroldek</span>
+  </footer>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
 <div class="modal-backdrop" id="settingsModal" hidden>
   <div class="modal">
-    <div class="modal-head"><h3>Настройки</h3><button id="closeModal" class="icon-btn" aria-label="Закрыть">✕</button></div>
-    <div class="modal-note">Фотографии обрабатываются прямо на твоём телефоне. На сервер уходят только готовые стикеры (до 512 КБ каждый) и только чтобы добавить их в твой пак.</div>
-    <p class="hint">В этом браузере хранятся настройки и список созданных тобой паков.</p>
+    <div class="modal-head"><h3 data-i18n="set.title">Налаштування</h3><button id="closeModal" class="icon-btn" data-i18n-aria="close.aria" aria-label="Закрити">✕</button></div>
+    <div class="field"><span data-i18n="set.lang">Мова</span>
+      <div class="seg" id="langSeg">
+        <button data-v="uk">Українська</button>
+        <button data-v="ru">Русский</button>
+      </div>
+    </div>
+    <div class="modal-note" data-i18n="set.note">Фотографії обробляються просто на твоєму телефоні. На сервер потрапляють лише готові стікери (до 512 КБ кожен) і лише щоб додати їх у твій пак.</div>
+    <p class="hint" data-i18n="set.hint">У цьому браузері зберігаються налаштування та список створених тобою паків.</p>
     <div class="queue-actions">
-      <button class="secondary-btn danger" id="resetAll">Стереть данные в браузере</button>
+      <button class="secondary-btn danger" id="resetAll" data-i18n="set.reset">Стерти дані в браузері</button>
     </div>
   </div>
 </div>
