@@ -1,5 +1,5 @@
 {
-  "name": "ИМЯ-ТВОЕГО-ПРОЕКТА",
+  "name": "sticker-factory-live",
   "main": "_worker.js",
   "compatibility_date": "2025-01-01",
   "keep_vars": true,
