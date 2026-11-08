@@ -1,0 +1,11 @@
+{
+  "name": "ИМЯ-ТВОЕГО-ПРОЕКТА",
+  "main": "_worker.js",
+  "compatibility_date": "2025-01-01",
+  "keep_vars": true,
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  }
+}
