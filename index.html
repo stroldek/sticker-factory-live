@@ -9,13 +9,21 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icon.svg">
+<link rel="preload" href="./poppins-700.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">S</div><div><b>Sticker Factory</b><small data-i18n="brand.sub">Фото → стікерпак Telegram</small></div></div>
-    <button class="icon-btn" id="settingsBtn" data-i18n-aria="set.aria" aria-label="Налаштування">⚙</button>
+    <a class="wordmark" href="./" aria-label="stickers factory"><span>stickers</span> <b>factory</b></a>
+    <button class="icon-btn" id="settingsBtn" data-i18n-aria="set.aria" aria-label="Налаштування">
+      <svg class="ico-settings" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+          <path d="M4 7h9.3M18.7 7H20"/><path d="M4 12h2.3M11.7 12H20"/><path d="M4 17h7.3M16.7 17H20"/>
+        </g>
+        <g fill="var(--green)"><circle class="k k1" cx="16" cy="7" r="2.5"/><circle class="k k2" cx="9" cy="12" r="2.5"/><circle class="k k3" cx="14" cy="17" r="2.5"/></g>
+      </svg>
+    </button>
   </header>
 
   <main>
@@ -148,7 +156,7 @@
 <div class="toast" id="toast" role="status"></div>
 <div class="modal-backdrop" id="settingsModal" hidden>
   <div class="modal">
-    <div class="modal-head"><h3 data-i18n="set.title">Налаштування</h3><button id="closeModal" class="icon-btn" data-i18n-aria="close.aria" aria-label="Закрити">✕</button></div>
+    <div class="modal-head"><h3 data-i18n="set.title">Налаштування</h3><button id="closeModal" class="icon-btn" data-i18n-aria="close.aria" aria-label="Закрити"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
     <div class="field"><span data-i18n="set.lang">Мова</span>
       <div class="seg" id="langSeg">
         <button data-v="uk">Українська</button>
